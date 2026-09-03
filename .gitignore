@@ -1,0 +1,14 @@
+# macOS
+.DS_Store
+
+# JetBrains / PyCharm / IntelliJ
+.idea/
+
+# Editor swap/backup files
+*.swp
+*.swo
+*~
+
+# Local scratch/test files
+*.local.groovy
+secrets.local.txt
