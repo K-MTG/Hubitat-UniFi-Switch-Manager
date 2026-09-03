@@ -2,7 +2,7 @@
  * UniFi Switch Port Manager
  *
  * Filename: unifi-switch-port.groovy
- * Version:  0.1.0
+ * Version:  0.1.1
  *
  * Description:
  * - Represents a single port on a UniFi switch (e.g. a PoE port feeding a
@@ -59,6 +59,10 @@
  *   Hubitat's device state is shown in plaintext in the UI, unlike the
  *   masked `password` preference field, so caching a live session there
  *   would leave a working bearer credential sitting around in the clear.
+ *
+ * Changes (0.1.1):
+ * - Trim/lowercase MAC and network-name comparisons for whitespace safety
+ * - Clarify the resp.data.data JSON access with an inline comment
  *
  * Changes (0.1.0):
  * - Initial Release
@@ -227,10 +231,12 @@ private Map findSwitchDevice(Map session) {
         timeout        : 15
     ]
 
-    String macLower = switchMac?.toLowerCase()
+    String macLower = switchMac?.trim()?.toLowerCase()
     Map found = null
     try {
         httpGet(params) { resp ->
+            // resp.data is Hubitat's parsed JSON body; UniFi's own response
+            // envelope is {"meta":..., "data":[...]}, hence resp.data.data
             found = resp.data?.data?.find { (it.mac as String)?.toLowerCase() == macLower }
         }
     } catch (Exception e) {
@@ -249,10 +255,13 @@ private String findNetworkIdByName(Map session, String name) {
         timeout        : 15
     ]
 
+    String nameTrimmed = name?.trim()
     String id = null
     try {
         httpGet(params) { resp ->
-            def match = resp.data?.data?.find { it.name == name }
+            // resp.data is Hubitat's parsed JSON body; UniFi's own response
+            // envelope is {"meta":..., "data":[...]}, hence resp.data.data
+            def match = resp.data?.data?.find { it.name == nameTrimmed }
             id = match?._id
         }
     } catch (Exception e) {
